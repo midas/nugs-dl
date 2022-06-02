@@ -14,13 +14,21 @@ defmodule NugsDl.Nugs.Endpoint do
 
       # Private ##########
 
-      defp process_response(%{body: body, headers: headers, status_code: status}=response)
+      defp process_response!(response, fields_to_take \\ nil) do
+        process_response(response, fields_to_take)
+        |> case do
+          {:ok, response} -> response
+          _any -> raise("Unhandled Response")
+        end
+      end
+
+      defp process_response(%{body: body, headers: headers, status_code: status}=response, fields_to_take \\ nil)
         when status >= 200 and status < 300
       do
         body =
           body
           |> Jason.decode!()
-          #|> Map.take(@expected_fields)
+          |> maybe_take_fields(fields_to_take)
           #|> Enum.map(fn({k, v}) -> {String.to_atom(k), v} end)
 
         {
@@ -30,6 +38,12 @@ defmodule NugsDl.Nugs.Endpoint do
             cookies: get_cookies(headers),
           })
         }
+      end
+
+      defp maybe_take_fields(body, nil), do: body
+
+      defp maybe_take_fields(%{"Response" => response}=body, fields_to_take) do
+        Map.put(body, "Response",  Map.take(response, fields_to_take))
       end
 
       defp add_cookies(headers, cookies) do

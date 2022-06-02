@@ -45,6 +45,7 @@ defmodule NugsDl.MixProject do
       {:httpoison, "~> 1.8"},
       {:jason, "~> 1.3"},
       {:optimus, "~> 0.3"},
+      {:tabula, "~> 2.1.1"},
     ]
   end
 
