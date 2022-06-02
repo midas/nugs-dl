@@ -14,6 +14,7 @@ defmodule NugsDl.CLI do
   @impl Bakeware.Script
   def main(argv) do
     #IO.puts "=====> EScript Entypoint"
+    print_title()
     execute(argv)
     0
   end
@@ -86,6 +87,18 @@ defmodule NugsDl.CLI do
 
   defp process_command(options) do
     IO.inspect(options, label: "--- process_command CATCH ALL ---")
+  end
+
+  defp print_title do
+    IO.puts("""
+
+       _____                 ____  __
+      |   | |_ _ ___ ___ ___|    \\|  |
+      | | | | | | . |_ -|___|  |  |  |__
+      |_|___|___|_  |___|   |____/|_____|
+                |___|
+
+    """)
   end
 
 end

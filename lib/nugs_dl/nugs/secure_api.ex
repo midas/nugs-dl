@@ -16,9 +16,20 @@ defmodule NugsDl.Nugs.SecureApi do
     url = @url <> "?" <> query
 
     HTTPoison.get!(url, @common_headers)
-    |> process_response_body()
-    |> IO.inspect()
+    |> process_response()
   end
 
+  def get_subscriber_info(cookies) do
+    params = [
+      orgn: @orgn,
+      method: "user.site.getSubscriberInfo"
+    ]
+
+    url = add_query_params(@url, params)
+    headers = add_cookies(@common_headers, cookies)
+
+    HTTPoison.get!(url, headers)
+    |> process_response()
+  end
 
 end
