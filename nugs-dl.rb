@@ -1,5 +1,5 @@
 #!/usr/bin/ruby
-#
+
 require 'net/http'
 require 'json'
 require 'date'
@@ -332,6 +332,11 @@ class NugsAPI
     end
 
     @options = options
+  end
+
+  def convert_to_mp3
+    # TODO
+    #`ffmpeg -i inputfile.m4a -acodec libmp3lame -ab 93k outputfile.mp3`
   end
 
   def ensure_output_path
