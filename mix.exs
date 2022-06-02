@@ -7,7 +7,20 @@ defmodule NugsDl.MixProject do
       version: "0.1.0",
       elixir: "~> 1.10",
       start_permanent: Mix.env() == :prod,
+      build_embedded: Mix.env == :prod,
+      start_permanent: Mix.env == :prod,
+      escript: escript(),
       deps: deps()
+    ]
+  end
+
+  def escript do
+    [
+      main_module: NugsDl.CLI,
+      name: "nugs-dl",
+      path: "nugs-dl",
+      #emu_args: ["-name master@127.0.0.1"],
+      #emu_args: ["-sname master -setcookie baz"],
     ]
   end
 
