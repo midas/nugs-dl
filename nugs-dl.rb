@@ -22,6 +22,7 @@ class NugsAPI
     @url_template = "https://play.nugs.net/#/catalog/recording/"
 
     parse_args()
+    ensure_deps()
     puts @options.inspect
     #raise("JASON")
   end
@@ -106,7 +107,7 @@ class NugsAPI
     performance_date = Date.strptime(meta['performanceDate'], '%m/%d/%Y')
     album_title = "#{performance_date.strftime('%Y-%m-%d')} - #{venue}"
 
-    announce "Processing album #{artist} - #{album_title} (#{@options[:quality]})"
+    announce "Processing album | #{artist} - #{album_title} (#{@options[:quality]})"
 
     folder = Pathname.new(File.join([@options[:output_path], artist, album_title, @options[:file_type]]))
     tracks = meta['tracks']
@@ -337,6 +338,19 @@ class NugsAPI
     @options[:output_path].mkpath
   end
 
+  def ensure_deps
+    `which brew`
+    if $?.exitstatus != 0
+      raise "You must install homebrew to use this script: https://docs.brew.sh/Installation"
+    end
+
+    `which ffmpeg`
+    if $?.exitstatus != 0
+      raise "You must install ffmpeg to use this script: `brew install ffmpeg`"
+    end
+    #raise "JASON"
+  end
+
   def valid_url?(url)
     url.match(@url_regex)
   end
@@ -350,10 +364,19 @@ class NugsAPI
   end
 
   def announce(str)
-    puts ""
-    puts "===> #{str}"
+    puts "\e[0;36m===> #{str}\e[0;0m"
   end
 
+end
+
+############################################################################
+
+def success(msg)
+  puts "\e[0;32m#{msg}\e[0;0m"
+end
+
+def error(msg)
+  puts "\e[0;31m#{msg}\e[0;0m"
 end
 
 def print_title
@@ -366,13 +389,22 @@ def print_title
   """)
 end
 
+############################################################################
 
 print_title()
 puts ""
 
-nugs_api = NugsAPI.new
-nugs_api.auth()
-puts ""
-plan_info = nugs_api.get_subscriber_info()
-puts "Signed in successfully - " + plan_info + " account."
-nugs_api.process_albums()
+begin
+  nugs_api = NugsAPI.new
+  nugs_api.auth()
+  puts ""
+  plan_info = nugs_api.get_subscriber_info()
+  success "Signed in successfully | " + plan_info + " account."
+  puts""
+  nugs_api.process_albums()
+rescue Exception => e
+  error(e.message)
+  exit 1
+end
+
+exit 0
