@@ -11,7 +11,7 @@ defmodule NugsDl.Command do
       defp blank_line,
         do: IO.puts("")
 
-      defp success(msg),
+      defp success(msg \\ "Success"),
         do: IO.puts("\e[0;32m#{msg}\e[0;0m")
 
       defp error(msg),

@@ -21,13 +21,23 @@ defmodule NugsDl.Commands.Download do
 
     success("Signed in successfully | " <> plan_name <> " account.")
 
+    albums_count = Enum.count(album_ids)
+
     blank_line()
-    announce("Fetching metadata for #{Enum.count(album_ids)} album(s)")
-    {:ok, responses} = Api.get_album_metas(cookies, album_ids)
-    album_metadatas = Enum.map(responses, fn(response) -> Map.get(response, :body)["Response"] end)
-    albums = Enum.map(album_metadatas, &Album.new/1)
-           #|> IO.inspect()
-    success("Done")
+    announce("Fetching metadata for #{albums_count} album(s)")
+    albums =
+      album_ids
+      |> Stream.with_index
+      |> Enum.map(fn({album_id, idx}) ->
+           ProgressBar.render(idx, albums_count)
+           {:ok, response} = Api.get_album_meta(cookies, album_id)
+           results =
+             Map.get(response, :body)["Response"]
+             |> Album.new()
+           ProgressBar.render(idx+1, albums_count)
+           results
+         end)
+    success()
   end
 
 end
