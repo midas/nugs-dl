@@ -2,7 +2,7 @@ defmodule NugsDl.Commands.Download do
 
   use NugsDl.Command
 
-  alias NugsDl.Nugs.{Api, SecureApi}
+  alias NugsDl.Nugs.{Api, PlayerApi, SecureApi}
   alias NugsDl.Album
 
   def execute(%{options: %{album_ids: album_ids, user: user, password: password}}=options) do
@@ -38,6 +38,26 @@ defmodule NugsDl.Commands.Download do
            results
          end)
     success()
+
+    albums =
+      Enum.map(albums, fn(album) ->
+        tracks_count = Enum.count(album.tracks)
+        blank_line()
+        announce("Fetching track URLs for #{tracks_count} tracks from: #{album.artist_name} | #{album.title}")
+        tracks =
+          album.tracks
+          |> Stream.with_index()
+          |> Enum.map(fn({track, idx}) ->
+            ProgressBar.render(idx, tracks_count)
+            {:ok, response} = PlayerApi.get_track_url(cookies, track.id, 1) # TODO fix hard-coded format_id
+            streamLink = Map.get(response, :body)["streamLink"]
+            result = %{track | stream_url: streamLink}
+            ProgressBar.render(idx+1, tracks_count)
+            result
+          end)
+
+        %{album | tracks: tracks}
+      end)
   end
 
 end

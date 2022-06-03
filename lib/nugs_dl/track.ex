@@ -6,6 +6,7 @@ defmodule NugsDl.Track do
     set_num
     track_num
     disc_num
+    stream_url
   )a
 
   def new(%{
