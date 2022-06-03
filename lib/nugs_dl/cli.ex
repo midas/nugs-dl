@@ -82,11 +82,62 @@ defmodule NugsDl.CLI do
   end
 
   defp process_command({[:download], options}) do
-    NugsDl.Commands.Download.execute(options)
+    options
+    |> populate_calculated_args()
+    |> NugsDl.Commands.Download.execute()
   end
 
   defp process_command(options) do
     IO.inspect(options, label: "--- process_command CATCH ALL ---")
+  end
+
+  defp populate_calculated_args(options) do
+    opts = options.options
+
+    opts =
+      case opts[:quality] do
+        "1" ->
+          Map.merge(opts, %{
+            quality: "16-bit / 44.1kHz FLAC",
+            format_id: 1
+          })
+        "2" ->
+          Map.merge(opts, %{
+            quality: "16-bit / 44.1kHz ALAC",
+            format_id: 2
+          })
+        "4" ->
+          Map.merge(opts, %{
+            quality: "24-bit MQA",
+            format_id: 4
+          })
+        _ ->
+          Map.merge(opts, %{
+            quality: "AAC 150",
+            format_id: nil # TODO ????
+          })
+      end
+
+      opts =
+        case opts[:format_id] do
+          1 ->
+            Map.merge(opts, %{
+              ext: ".flac",
+              file_type: "flac",
+            })
+          2 ->
+            Map.merge(opts, %{
+              ext: ".alac.m4a",
+              file_type: "alac",
+            })
+          _ ->
+            Map.merge(opts, %{
+              ext: ".m4a",
+              file_type: "m4a",
+            })
+        end
+
+    Map.put(options, :options, opts)
   end
 
   defp print_title do
