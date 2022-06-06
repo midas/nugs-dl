@@ -5,7 +5,7 @@ defmodule NugsDl.Commands.Download do
   alias NugsDl.Nugs.{Api, PlayerApi, SecureApi}
   alias NugsDl.Album
 
-  def execute(%{options: %{album_ids: album_ids, user: user, password: password}}=options) do
+  def execute(%{options: %{album_ids: album_ids, format_id: format_id, user: user, password: password}}=options) do
     IO.puts "Executing the `download` command with options:"
     blank_line()
     print_options_table(options)
@@ -49,7 +49,7 @@ defmodule NugsDl.Commands.Download do
           |> Stream.with_index()
           |> Enum.map(fn({track, idx}) ->
             ProgressBar.render(idx, tracks_count)
-            {:ok, response} = PlayerApi.get_track_url(cookies, track.id, 1) # TODO fix hard-coded format_id
+            {:ok, response} = PlayerApi.get_track_url(cookies, track.id, format_id)
             streamLink = Map.get(response, :body)["streamLink"]
             result = %{track | stream_url: streamLink}
             ProgressBar.render(idx+1, tracks_count)

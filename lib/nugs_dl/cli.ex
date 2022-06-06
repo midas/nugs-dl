@@ -31,6 +31,40 @@ defmodule NugsDl.CLI do
       allow_unknown_args: true,
       parse_double_dash: true,
       subcommands: [
+        convert: [
+          name: "convert",
+          about: "Convert files to different formats",
+          options: [
+            bit_rate: [
+              value_name: "BIT_RATE",
+              short: "-b",
+              long: "--bit-rate",
+              help: "The bit rate to encode the converted file(s) at",
+              default: "256k"
+            ],
+            format: [
+              value_name: "FORMAT",
+              short: "-f",
+              long: "--format",
+              help: "The format to convert the file(s) to (alac, mp3)",
+              required: true
+            ],
+            in_path: [
+              value_name: "IN_PATH",
+              short: "-i",
+              long: "--in-path",
+              help: "The folder containing the file(s) to convert",
+              required: true
+            ],
+            output_path: [
+              value_name: "OUTPUT_PATH",
+              short: "-o",
+              long: "--output-path",
+              help: "The folder to write the converted files to",
+              required: true
+            ],
+          ]
+        ],
         download: [
           name: "download",
           about: "Downloads one or more albums",
@@ -81,9 +115,15 @@ defmodule NugsDl.CLI do
     |> process_command()
   end
 
+  defp process_command({[:convert], options}) do
+    options
+    #|> populate_calculated_args(:convert)
+    |> NugsDl.Commands.Convert.execute()
+  end
+
   defp process_command({[:download], options}) do
     options
-    |> populate_calculated_args()
+    |> populate_calculated_args(:download)
     |> NugsDl.Commands.Download.execute()
   end
 
@@ -91,7 +131,7 @@ defmodule NugsDl.CLI do
     IO.inspect(options, label: "--- process_command CATCH ALL ---")
   end
 
-  defp populate_calculated_args(options) do
+  defp populate_calculated_args(options, :download) do
     opts = options.options
 
     opts =
@@ -139,6 +179,8 @@ defmodule NugsDl.CLI do
 
     Map.put(options, :options, opts)
   end
+
+  defp populate_calculated_args(options, _any), do: options
 
   defp print_title do
     IO.puts("""
