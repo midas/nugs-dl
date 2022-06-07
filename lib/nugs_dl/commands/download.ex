@@ -5,7 +5,7 @@ defmodule NugsDl.Commands.Download do
   alias NugsDl.Nugs.{Api, PlayerApi, SecureApi}
   alias NugsDl.Album
 
-  def execute(%{options: %{album_ids: album_ids, format_id: format_id, user: user, password: password}}=options) do
+  def execute(%{options: %{album_ids: album_ids, convert: convert, ext: ext, file_type: file_type, format_id: format_id, user: user, password: password, output_path: output_path}=opts}=options) do
     IO.puts "Executing the `download` command with options:"
     blank_line()
     print_options_table(options)
@@ -58,6 +58,38 @@ defmodule NugsDl.Commands.Download do
 
         %{album | tracks: tracks}
       end)
+
+    # download tracks
+    Enum.each(albums, fn(album) ->
+      blank_line()
+      announce("Downloading album: #{album.artist_name} | #{album.title}")
+      album_path = Path.join([output_path, album.artist_name, album.title, file_type])
+
+      Enum.each(album.tracks, fn(track) ->
+        File.mkdir_p(album_path)
+        file_path = Path.join([album_path, "#{track.disc_num}-#{track.set_num}-#{track.track_num} - #{track.title}#{ext}"])
+        IO.puts("Downloading track: #{track.disc_num}-#{track.set_num}-#{track.track_num} #{track.title}#{ext}")# to #{file_path}")
+        PlayerApi.download_track(track, file_path, cookies)
+      end)
+
+      unless is_nil(convert) do
+        convert_tracks(opts, album_path)
+      end
+    end)
+  end
+
+  defp convert_tracks(options, in_path) do
+    blank_line()
+    announce("Converting tracks")
+
+    options =
+      options[:convert]
+      |> Map.merge(%{
+           in_path: in_path,
+           output_path: Path.join(Path.dirname(in_path), options[:convert][:format])
+         })
+
+    NugsDl.Commands.Convert.execute(%{options: options, args: %{}, flags: %{}})
   end
 
 end

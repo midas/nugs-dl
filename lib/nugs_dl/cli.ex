@@ -75,6 +75,17 @@ defmodule NugsDl.CLI do
           name: "download",
           about: "Downloads one or more albums",
           options: [
+            convert: [
+              value_name: "CONVERT_OPTS",
+              short: "-c",
+              long: "--convert",
+              help: "Use this option to specify conversion once download is completed",
+              required: false,
+              parser: fn(s) ->
+                [format, bit_rate] = String.split(s, ",")
+                {:ok, %{format: format, bit_rate: bit_rate}}
+              end,
+            ],
             user: [
               value_name: "USER",
               short: "-u",
