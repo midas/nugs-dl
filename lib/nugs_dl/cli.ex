@@ -63,8 +63,8 @@ defmodule NugsDl.CLI do
               value_name: "OUTPUT_PATH",
               short: "-o",
               long: "--output-path",
-              help: "The folder to write the converted files to",
-              required: true,
+              help: "The folder to write the converted files to (defaults to a parallel mp3 folder if final folder in in path is alac or flac)",
+              required: false,
               parser: fn(s) ->
                 {:ok, Path.expand(s)}
               end,
@@ -126,7 +126,7 @@ defmodule NugsDl.CLI do
 
   defp process_command({[:convert], options}) do
     options
-    #|> populate_calculated_args(:convert)
+    |> populate_calculated_args(:convert)
     |> NugsDl.Commands.Convert.execute()
   end
 
@@ -138,6 +138,18 @@ defmodule NugsDl.CLI do
 
   defp process_command(options) do
     IO.inspect(options, label: "--- process_command CATCH ALL ---")
+  end
+
+  defp populate_calculated_args(%{options: %{in_path: in_path}=opts}=options, :convert) do
+    opts =
+      cond do
+        Enum.member?(~w(alac flac), Path.basename(in_path)) ->
+          Map.put(opts, :output_path, Path.join(Path.dirname(in_path), "mp3"))
+        true ->
+          opts
+      end
+
+    Map.put(options, :options, opts)
   end
 
   defp populate_calculated_args(options, :download) do
