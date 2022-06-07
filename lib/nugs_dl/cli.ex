@@ -54,14 +54,20 @@ defmodule NugsDl.CLI do
               short: "-i",
               long: "--in-path",
               help: "The folder containing the file(s) to convert",
-              required: true
+              required: true,
+              parser: fn(s) ->
+                {:ok, Path.expand(s)}
+              end,
             ],
             output_path: [
               value_name: "OUTPUT_PATH",
               short: "-o",
               long: "--output-path",
               help: "The folder to write the converted files to",
-              required: true
+              required: true,
+              parser: fn(s) ->
+                {:ok, Path.expand(s)}
+              end,
             ],
           ]
         ],
@@ -81,7 +87,10 @@ defmodule NugsDl.CLI do
               short: "-o",
               long: "--output-path",
               help: "The folder to write the downloaded files to",
-              required: true
+              required: true,
+              parser: fn(s) ->
+                {:ok, Path.expand(s)}
+              end,
             ],
             password: [
               value_name: "PASSWORD",
