@@ -5,7 +5,7 @@ defmodule NugsDl.Commands.Convert do
   alias NugsDl.Album
 
   def execute(%{options: opts}=options) do
-    IO.puts "Executing the `download` command with options:"
+    IO.puts "Executing the `convert` command with options:"
     blank_line()
     print_options_table(options)
 
